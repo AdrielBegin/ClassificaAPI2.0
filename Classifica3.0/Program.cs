@@ -1,4 +1,5 @@
 using Classifica3._0.Context;
+using Classifica3._0.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,9 +11,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connection =  builder.Configuration.GetConnectionString("DefaultConnection");
+var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connection));
-
+builder.Services.AddScoped<ICardsRepository, CardsRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

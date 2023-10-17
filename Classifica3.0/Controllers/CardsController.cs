@@ -1,5 +1,6 @@
 ﻿using Classifica3._0.Context;
 using Classifica3._0.Model;
+using Classifica3._0.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,140 +9,74 @@ using Microsoft.EntityFrameworkCore;
 namespace Classifica3._0.Controllers
 {
     [Route("api/[controller]")]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     [ApiController]
-    public class CardsController : Controller
+    public class CardsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICardsRepository _cardsRepository;
 
-        public CardsController(AppDbContext context)
+        public CardsController(ICardsRepository cardsRepository)
         {
-            _context = context;
+            _cardsRepository = cardsRepository;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet("GetAll")]
+        public async Task<IEnumerable<Card>> GetAllCards()
         {
-            if (_context.Cards != null)
+            return await _cardsRepository.GetAllCardsAsync();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Card>> GetCardsAsync(int CardId)
+        {
+            var card = await _cardsRepository.GetCardsAsync(CardId);
+
+            if (card != null)
             {
-                var cards = await _context.Cards.ToListAsync();
-                return Ok(cards);
+                return card;
             }
             else
             {
-                return Problem("Entity set 'AppDbContext.Cards'  is null.", null, 500);
+                return NotFound("Não encontrado");
+
             }
-
-        }
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Cards == null)
-            {
-                return NotFound("Não encontrado ou não existe");
-            }
-
-            var card = await _context.Cards.FirstOrDefaultAsync(m => m.CardId == id);
-
-            if (card == null)
-            {
-                return NotFound("Não encontrado o id");
-            }
-
-            return Ok(card);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("CardId,Titulo,Descricao,DataCardCreated,DataCardUpdated")] Card card)
+        public async Task<ActionResult<Card>> PostCard([FromBody] Card card)
         {
-            if (ModelState.IsValid)
-            {
-                card.Ativo();
-                _context.Add(card);
-                await _context.SaveChangesAsync();
-                return Ok();
-            }
-            return Ok(card);
-        }
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Cards == null)
-            {
-                return NotFound();
-            }
-            var card = await _context.Cards.FindAsync(id);
-
-            if (card == null)
-            {
-                return NotFound();
-            }
-            return Ok(card);
+            var newCard = await _cardsRepository.CreateCard(card);
+            return CreatedAtAction(nameof(GetCardsAsync), new { id = newCard.CardId }, newCard);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(int id, [Bind("CardId,Titulo,Descricao,DataCardCreated,DataCardUpdated")] Card card)
+        [HttpPut]
+        public async Task<ActionResult> PutCard(int CardId, [FromBody] Card card)
         {
-            if (id != card.CardId)
+            if (CardId == card.CardId)
             {
-                return NotFound();
+                await _cardsRepository.UpdateCard(card);
+                return Accepted();
             }
-
-            if (ModelState.IsValid)
+            else
             {
-                try
-                {
-                    card.DateUpdated();
-                    _context.Update(card);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CardExists(card.CardId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return Ok();
+                return BadRequest("Id é diferente");
             }
-            return Ok(card);
         }
-        public async Task<IActionResult> Delete(int? id)
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteCard(int CardId)
         {
-            if (id == null || _context.Cards == null)
+            var cardDelete = await _cardsRepository.GetCardsAsync(CardId);
+            if (cardDelete != null)
             {
+                await _cardsRepository.DeleteCard(cardDelete.CardId);
                 return NoContent();
             }
-
-            var card = await _context.Cards.FirstOrDefaultAsync(m => m.CardId == id);
-
-            if (card == null)
+            else
             {
                 return NotFound();
             }
-            return Ok(card);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Cards == null)
-            {
-                return Problem("Entity set 'AppDbContext.Cards'  is null.");
-            }
-            var card = await _context.Cards.FindAsync(id);
-            if (card != null)
-            {
-                card.Inativo();
-                _context.Cards.Update(card);
-            }
-            await _context.SaveChangesAsync();
-
-            return Ok();
-
-        }
-        private bool CardExists(int id)
-        {
-            return (_context.Cards?.Any(e => e.CardId == id)).GetValueOrDefault();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Classifica3._0.Model
     {
         public Card()
         {
-            DataCardCreated = DateTime.Now;
+            DateCardCreated = DateTime.Now;
         }
         public int CardId { get; set; }
 
