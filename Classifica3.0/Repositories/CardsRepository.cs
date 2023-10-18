@@ -25,8 +25,13 @@ namespace Classifica3._0.Repositories
         public async Task DeleteCard(int CardId)
         {
             var cardDelete = await _context.Cards.FindAsync(CardId);
-            cardDelete.Inativo();
-            _context.Cards.Update(cardDelete);
+
+            if (cardDelete != null)
+            {
+                cardDelete.Inativo();
+                _context.Cards.Update(cardDelete);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<IEnumerable<Card>> GetAllCardsAsync()

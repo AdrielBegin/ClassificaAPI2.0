@@ -4,7 +4,6 @@ using Classifica3._0.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Classifica3._0.Controllers
 {
@@ -27,7 +26,7 @@ namespace Classifica3._0.Controllers
             return await _cardsRepository.GetAllCardsAsync();
         }
 
-        [HttpGet]
+        [HttpGet("Get")]
         public async Task<ActionResult<Card>> GetCardsAsync(int CardId)
         {
             var card = await _cardsRepository.GetCardsAsync(CardId);
@@ -43,14 +42,23 @@ namespace Classifica3._0.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<ActionResult<Card>> PostCard([FromBody] Card card)
         {
             var newCard = await _cardsRepository.CreateCard(card);
-            return CreatedAtAction(nameof(GetCardsAsync), new { id = newCard.CardId }, newCard);
+            try
+            {
+                CreatedAtAction(nameof(GetCardsAsync), new { id = newCard.CardId }, newCard);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Deu ruim: {ex}");
+            }
+            return newCard;
         }
 
-        [HttpPut]
+        [HttpPut("Update")]
         public async Task<ActionResult> PutCard(int CardId, [FromBody] Card card)
         {
             if (CardId == card.CardId)
@@ -64,7 +72,7 @@ namespace Classifica3._0.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("Delete")]
         public async Task<ActionResult> DeleteCard(int CardId)
         {
             var cardDelete = await _cardsRepository.GetCardsAsync(CardId);
@@ -76,7 +84,7 @@ namespace Classifica3._0.Controllers
             else
             {
                 return NotFound();
-            }
+            }            
         }
     }
 }
