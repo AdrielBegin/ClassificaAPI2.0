@@ -5,16 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors();
+
 var connection = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connection));
+
 builder.Services.AddScoped<ICardsRepository, CardsRepository>();
+
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
@@ -26,6 +31,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(builder =>
+    builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
+           .AllowAnyHeader()
+           .AllowAnyMethod()
+           .AllowCredentials()
+           .SetIsOriginAllowed(_ => true)
+           .WithHeaders("Authorization", "Content-Type")
+);
+
+
 
 app.UseHttpsRedirection();
 
