@@ -1,10 +1,10 @@
 using Classifica3._0.Context;
 using Classifica3._0.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddControllers();
 
@@ -22,6 +22,13 @@ builder.Services.AddScoped<ICardsRepository, CardsRepository>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie( options =>
+    {
+        options.Cookie.Name = "AspNetCore.Cookies";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+        options.SlidingExpiration = true;
+    });
 
 var app = builder.Build();
 
@@ -40,8 +47,6 @@ app.UseCors(builder =>
            .SetIsOriginAllowed(_ => true)
            .WithHeaders("Authorization", "Content-Type")
 );
-
-
 
 app.UseHttpsRedirection();
 

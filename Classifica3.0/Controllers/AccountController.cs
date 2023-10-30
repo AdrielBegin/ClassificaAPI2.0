@@ -69,5 +69,12 @@ namespace Classifica3._0.Controllers
             return Ok(user);
 
         }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await signInManager.SignOutAsync();
+            return Ok();
+        }
     }
 }

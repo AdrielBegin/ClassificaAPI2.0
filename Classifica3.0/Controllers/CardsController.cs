@@ -1,6 +1,7 @@
 ﻿using Classifica3._0.Context;
 using Classifica3._0.Model;
 using Classifica3._0.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,8 @@ namespace Classifica3._0.Controllers
     [Consumes("application/json")]
     [Produces("application/json")]
     [ApiController]
+
+    [Authorize]
     public class CardsController : ControllerBase
     {
         private readonly ICardsRepository _cardsRepository;
