@@ -1,6 +1,8 @@
 using Classifica3._0.Context;
 using Classifica3._0.Repositories;
+using Classifica3._0.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,13 +24,16 @@ builder.Services.AddScoped<ICardsRepository, CardsRepository>();
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie( options =>
+    .AddCookie(options =>
     {
         options.Cookie.Name = "AspNetCore.Cookies";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
         options.SlidingExpiration = true;
     });
+
+builder.Services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
 
 var app = builder.Build();
 
@@ -49,11 +54,31 @@ app.UseCors(builder =>
 );
 
 app.UseHttpsRedirection();
-
+await CriarPerfisUsuariosAsync(app);
 app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.MapAreaControllerRoute(
+    name: "MinhaArea", 
+    areaName:"Admin",
+    pattern: "{controller:Admin}/{id?}"
+    );
+
 app.MapControllers();
 
 app.Run();
+
+async Task CriarPerfisUsuariosAsync(WebApplication app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory?.CreateScope())
+    {
+        var service = scope?.ServiceProvider.GetService<ISeedUserRoleInitial>();
+        await service.SeedRolesAsync();
+        await service.SeedUsersAsync();
+
+    }
+
+};
