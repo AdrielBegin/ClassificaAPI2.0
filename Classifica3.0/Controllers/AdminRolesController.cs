@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Classifica3._0.Controllers
 {
@@ -14,6 +16,15 @@ namespace Classifica3._0.Controllers
             this.roleManager = roleManager;
             this.userManager = userManager;
         }
+
+        [HttpGet("GetAllRoles")]
+
+        public async Task<IEnumerable<IdentityRole>> GetAllRoles()
+        {
+            var resul = roleManager.Roles;
+            return resul;
+        }
+
 
         [HttpPost("CreateUsersAdmin")]
         public async Task<IActionResult> Create([FromBody] string name)

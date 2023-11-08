@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Classifica3._0.Controllers
 {
-    
+
     [ApiController]
     [Area("Admin")]
     public class AdminController : Controller
     {
-        
+
     }
 }
