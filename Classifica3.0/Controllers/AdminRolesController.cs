@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Classifica3._0.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Classifica3._0.Controllers
 {
@@ -50,6 +52,24 @@ namespace Classifica3._0.Controllers
             {
                 ModelState.AddModelError("", error.Description);
             }
+        }
+
+        [HttpGet("GetUpdate")]
+        public async Task<IActionResult> Update(string id)
+        {
+            IdentityRole role = await roleManager.FindByIdAsync(id);
+
+            List<IdentityUser> members = new List<IdentityUser>();
+
+            List<IdentityUser> nonMembers = new List<IdentityUser>();
+            foreach (IdentityUser user in userManager.Users)
+            {
+                var list = await userManager.IsInRoleAsync(user, role.Name) ? members : nonMembers; list.Add(user);
+            }
+
+            RoleEdit roleEdit = new RoleEdit { Role = role, Members = members, NonMembers = nonMembers };
+
+            return View(roleEdit);
         }
 
     }
