@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Classifica3._0.Controllers
 {
     [Area("Admin")]
+    //[Authorize(Roles = "Admin")]
     public class AdminUsersController : Controller
     {
         private readonly UserManager<IdentityUser> userManager;
@@ -16,15 +17,14 @@ namespace Classifica3._0.Controllers
         }
 
         [HttpGet("UserAll")]
-        public IActionResult GetAllUser()
+        public async Task<IEnumerable<IdentityUser>> GetAllUser()
         {
-            var result = userManager.Users.ToListAsync();
-            return Ok(result);
+            var result = userManager.Users;
+            return result;
         }
-
+        
         [HttpPost("DeletarUsers")]
-
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser([FromBody] string id)
         {
             var user = await userManager.FindByIdAsync(id);
 

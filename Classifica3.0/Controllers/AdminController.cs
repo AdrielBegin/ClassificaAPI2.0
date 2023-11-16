@@ -7,7 +7,7 @@ namespace Classifica3._0.Controllers
 {
 
     [ApiController]
-    [Area("Admin")]
+    //[Area("Admin")]
     public class AdminController : Controller
     {
 
